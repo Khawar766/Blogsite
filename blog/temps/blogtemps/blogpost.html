@@ -1,0 +1,138 @@
+{% extends 'hometemps/designlayout.html' %}
+{% block title %}Blog-Post{% endblock title %}
+{% block bodycontent %}{% load static %}
+{% csrf_token %}
+{% load humanize %}
+{% load extras %}
+<div class="container mb-5 pb-6">
+  <div class="row g-5 mt-1">
+    <div class="col-md-8 ml-8">
+      <h3 class="pb-4 mb-4 fst-italic border-bottom">
+        {{post.title}}
+      </h3>
+      <p class="blog-post-meta">{{post.time_stamp}} <i><mark>{{post.auther}}</mark></i> (<span>{{post.blog_views}} Views</span>)</p>
+      <div class=" col-md-6 position-relative content-center items-center max-w-7xl">
+        <img src="/media/{{post.thumbnail}}" width="800px" height="500px" alt="thumbnail should be here">
+      </div>
+      <article class="blog-post">
+        
+        <div class="ml-33">
+          <p class=" ml-4 mt-3">{{post.blog_content|safe}}</p>
+          
+        </div>
+      </article>
+      <div class="container mt-2">
+        <h1 class=" text-yellow-900 text-2xl font-extrabold font-serif">Comments & Replies &nbsp;({{comments.count}})</h1>
+        {% if request.user.is_authenticated %}
+        <form action="/blog/postComment/" method="post">{% csrf_token %}
+          <div class="form-group">
+            <textarea class=" outline-double" name="comment" id="comment" cols="100" rows="5"
+              placeholder="Type your comment here"></textarea>
+            <input type="hidden" name="commentid" id="commentid" value="">
+            <input type="hidden" name="postid" id="postid" value="{{post.post_id}}">
+          </div>
+          <br>
+          <input type="submit" class="outline rounded-sm bg-amber-500 w-auto" value="Post Comment">
+        </form>
+        {% else %}
+        <h4>Please Login to post your comment.</h4>
+        {% endif %}
+        {% for comment in comments %}
+        <div class=" grid  my-3 outline-dotted rounded-md bg-orange-50">
+          <div class=" row-start-1 mr-0 ml-1 mt-1">
+            <img src="{% static '/images/user.png' %}" alt="pic" class=" rounded-full max-h-10 max-w-md">
+          </div>
+          <div class=" row-start-1 row-auto col-span-12">
+            <p class=" font-extralight"> By
+              <i class=" ml-0 font-bold">{{comment.user.username}}:</i>  <span class="bg-slate-600 text-white h-fit rounded-sm"> about {{comment.time_stamp|naturaltime}} </span>
+            </p>
+            <div>{{comment.comment}}</div>
+            <div class="ml-2 reply">
+              {% if request.user.is_authenticated %}
+                <button class="btn btn-secondary text-black my-2 h-fit bg-slate-500 " type="button" data-bs-toggle="collapse" data-bs-target="#replybox{{comment.com_id}}" aria-expanded="false" aria-controls="replybox{{comment.com_id}}">
+                  Reply
+                </button> <br>
+              <div class="collapse" id="replybox{{comment.com_id}}">
+                <div class="card card-body visible">
+                  <form action="/blog/postComment/" method="post">{% csrf_token %}
+                    <div class="form-group">
+                      <label for="comment">Post reply</label>
+                      <textarea class=" outline-double" name="comment" id="comment" cols="70" rows="5"
+                        placeholder="Type your comment here"></textarea>
+                        <input type="hidden" name="commentid" id="commentid" value="{{comment.com_id}}">
+                    </div>
+                    <input type="hidden" name="postid" id="postid" value="{{post.post_id}}">
+                    <br>
+                    <input type="submit" class="outline rounded-sm bg-amber-500 w-auto" value="Post Reply">
+                  </form>
+                </div>
+              </div>
+              {% else %}
+              <button class="btn btn-secondary text-black my-2 h-fit bg-slate-500 " type="button" data-bs-toggle="collapse" data-bs-target="#replybox{{comment.com_id}}" aria-expanded="false" disabled aria-controls="replybox{{comment.com_id}}">
+                Login to Reply
+              </button>
+              {% endif %}
+              <div class="replies bg-orange-100">
+                {% for comreply in repDict|get_val:comment.com_id %}
+                <div class=" grid  my-3 outline-dotted rounded-md">
+                  <div class=" row-start-1 mr-0 ml-1 mt-1">
+                    <img src="{% static '/images/user.png' %}" alt="pic" class=" rounded-full max-h-10 max-w-md">
+                  </div>
+                  <div class=" row-start-1 row-auto col-span-12">
+                    <p class=" font-extralight"> By
+                      <i class=" ml-0 font-bold">{{comreply.user.username}}:</i> <span class="bg-slate-600 text-white h-fit rounded-sm">about {{comreply.time_stamp|naturaltime}}</span> 
+                    </p>
+                    <div>{{comreply.comment}}</div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+        </div>
+        {% endfor %}
+
+      </div>
+
+      <nav class="blog-pagination" aria-label="Pagination">
+        <a class="btn btn-outline-primary rounded-pill" href="#">Older</a>
+      </nav>
+    </div>
+    <div class="col-md-3 flex mr-0 d-flex">
+      <div class="position-sticky" style="top: 2rem;">
+        <div class="p-4 mb-3 bg-body-tertiary rounded">
+          <h4 class="fst-italic">ads</h4>
+
+        </div>
+
+        <div class="p-4">
+          <h4 class="fst-italic">Archives</h4>
+          <ol class="list-unstyled mb-0">
+            <li><a href="#">March 2021</a></li>
+            <li><a href="#">February 2021</a></li>
+            <li><a href="#">January 2021</a></li>
+            <li><a href="#">December 2020</a></li>
+            <li><a href="#">November 2020</a></li>
+            <li><a href="#">October 2020</a></li>
+            <li><a href="#">September 2020</a></li>
+            <li><a href="#">August 2020</a></li>
+            <li><a href="#">July 2020</a></li>
+            <li><a href="#">June 2020</a></li>
+            <li><a href="#">May 2020</a></li>
+            <li><a href="#">April 2020</a></li>
+          </ol>
+        </div>
+
+        <div class="p-4">
+          <h4 class="fst-italic">Like and share</h4>
+          <ol class="list-unstyled">
+            
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock bodycontent %}
